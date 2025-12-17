@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE actions SYSTEM "action-mapping.dtd">
+<actions>
+    <action name="build" repeatable="true">
+        <args>build</args>
+    </action>
+    <action name="clean" repeatable="true">
+        <args>clean</args>
+    </action>
+    <action name="compile.single" repeatable="true"/>
+    <action name="debug" repeatable="true"/>
+    <action name="run" repeatable="true"/>
+</actions>

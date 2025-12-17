@@ -1,0 +1,43 @@
+//gradlew distZip  // Erstellt ein .zip-Archiv//plugins {
+//   id 'java'
+//   id 'application'
+
+// Fügen Sie diese Zeile HIER ein:
+// app/build.gradle
+
+
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+}
+
+// ... dependencies Block ...
+
+// Lokale Variable zur Speicherung der Klasse
+def myMainClass = 'com.ihr.paket.IhreMainKlasse'
+
+/*jar {
+    manifest {
+        // Die Definition der Startklasse erfolgt NUR hier
+        attributes 'Sudoku': myMainClass
+    }
+}*/
+
+// WICHTIG: Die ursprüngliche Zeile 44 muss GELÖSCHT werden!
+// mainClassName = 'com.ihr.paket.IhreMainKlasse' // <--- NICHT HIER SETZEN!
+
+
+
+apply plugin: 'java'
+apply plugin: 'application' // <--- Fügen Sie dies hinzu
+apply plugin: 'maven-publish'
+
+application {
+    // Ersetzen Sie dies durch den vollständigen Paketnamen und Klassennamen Ihrer Hauptklasse
+    mainClass = 'org.solbach.sudoku.Sudoku'
+
+
+^G Help           ^O Write Out      ^W Where Is       ^K Cut            ^T Execute        ^C Location       M-U Undo          M-A Set Mark      M-] To Bracket    M-Q Previous      ^B Back           ^◂ Prev Word      ^A Home
+^X Exit           ^R Read File      ^\ Replace        ^U Paste          ^J Justify        ^/ Go To Line     M-E Redo          M-6 Copy          ^Q Where Was      M-W Next          ^F Forward        ^▸ Next Word      ^E End

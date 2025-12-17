@@ -1,0 +1,188 @@
+//gradlew distZip  // Erstellt ein .zip-Archiv//plugins {
+//   id 'java'
+//   id 'application'
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+
+}
+/*
+dependencies {
+    implementation 'https://com.github/csolbach51-123'
+}*/
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        // Ersetze dies durch deine tatsächliche Main-Klasse
+        attributes('Sudoku': 'org.solbach.sudoku') 
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+
+
+
+
+
+// ... dependencies Block ...
+
+// Lokale Variable zur Speicherung der Klasse
+def myMainClass = 'org.solbach.sudoku.Sudoku' 
+
+/*jar {
+    manifest {
+        // Die Definition der Startklasse erfolgt NUR hier
+        attributes 'Main-Class': myMainClass 
+    }
+}*/
+
+// WICHTIG: Die ursprüngliche Zeile 44 muss GELÖSCHT werden!
+// mainClassName = 'com.ihr.paket.IhreMainKlasse' // <--- NICHT HIER SETZEN!
+
+
+
+apply plugin: 'java'
+apply plugin: 'application' // <--- Fügen Sie dies hinzu
+apply plugin: 'maven-publish'
+
+application {
+    // Ersetzen Sie dies durch den vollständigen Paketnamen und Klassennamen Ihrer Hauptklasse
+    mainClass = 'org.solbach.sudoku.Sudoku'
+
+}
+
+
+
+jar {
+    // Optional: Stellt sicher, dass das Manifest auch korrekt gesetzt wird
+    manifest {
+        attributes 'Main-Class': application.mainClass.get()
+    }
+}
+// ... weitere Konfigurationen (z.B. dependencies-Block)
+
+
+
+// ... repositories, dependencies etc.
+// Wenn Sie ein Bibliotheksmodul bauen: apply plugin: 'java-library'
+// Wenn Sie die application-Konfiguration entfernen, brauchen Sie 'application' hier nicht.
+
+// app/build.gradle (Irgendwo nach den Plugins)
+
+
+
+
+// 2. Allgemeine Konfiguration:
+// ----------------------------
+
+// Stellt sicher, dass die Anwendung mit einer bestimmten Java-Version kompiliert wird.
+/*java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // Verwenden Sie Ihre gewünschte Java-Version
+    }
+}*/
+
+// 3. Repositories:
+// -----------------
+
+// Wo Gradle die benötigten Bibliotheken (Abhängigkeiten) suchen soll.
+repositories {
+    mavenCentral()
+}
+
+// 4. Abhängigkeiten (Dependencies):
+// ---------------------------------
+
+dependencies {
+    // 1. Die BOM MUSS die Version enthalten und MUSS die 'platform'-Methode verwenden.
+    testImplementation platform('org.junit:junit-bom:5.10.0') 
+    
+    // 2. Komponenten OHNE Versionsnummer.
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    
+    // 3. Engine MUSS in der Regel 'testRuntimeOnly' sein.
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine' 
+}
+
+// 5. Testkonfiguration:
+// ----------------------
+
+// Konfiguriert, wie die Tests (JUnit) ausgeführt werden sollen.
+test {
+    useJUnitPlatform()
+}
+
+// 6. JAR-Konfiguration (Optional, aber nützlich):
+// -----------------------------------------------
+
+// Erstellt ein "fat JAR" oder "executable JAR" (Optional: Nur, wenn Sie alles in einer Datei verpacken wollen)
+jar {
+	archiveFileName = 'SudokuSolver.jar'
+
+    manifest {
+        attributes 'Sudoku': 'org.solbach.sudoku.Sudoku' // Stellt sicher, dass die Main-Klasse im JAR-Manifest steht
+    }
+ 
+ }
+
+
+
+
+
+
+// app/build.gradle (geändert für AAB/APK)
+
+afterEvaluate {
+    // 1. Hole den Task, der das Artefakt erstellt (z.B. App Bundle  def appBundleTask = tasks.named('jar').get()
+   
+    }
+
+
+
+
+
+
+
+// In rootProject/build.gradle or rootProject/settings.gradle for multi-module
+task release {
+    description = "Executes the full build and publish lifecycle."
+
+    // Define the tasks that need to run when 'release' is executed
+    dependsOn 'clean', 'build', 'publish'
+
+    // Optional: If you need to run tasks in subprojects, use:
+    // dependsOn gradle.includedBuilds*.task(':clean'), gradle.includedBuilds*.task(':build'), ...
+}
+
+
+// In app/build.gradle
+
+publishing {
+    repositories {
+        // This repository name must match the one used in the task name
+        // (i.e., 'publish...ToMavenCentralRepository')
+        maven {
+            name = 'MavenCentralRepository' 
+            // The URL for Sonatype OSSRH/Maven Central Staging
+            url = uri("https://github.com/csolbach51/Sudokusolver")
+            
+            // SECURITY: Read properties from gradle.properties
+            credentials {
+                // The 'findProperty' method is safe and returns null if the property is missing
+              // username = project.hasProperty('mavenCentralUsername') ? project.mavenCentralUsername : ''
+              //  password = project.hasProperty('mavenCentralPassword') ? project.mavenCentralPassword : ''
+
+                // Alternatively, for better error handling (recommended):
+                 username = project.property("mavenCentralUsername")
+                 password = project.property("mavenCentralPassword")
+            }
+        }
+    }
+}
+

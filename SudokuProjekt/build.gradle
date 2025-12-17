@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+repositories {
+        mavenLocal() // This tells Gradle to "publish" to your computer's local .m2 folder
+    }
+}
+
+group = 'org.solbach'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    // Falls dein Programm eine GUI hat oder im Terminal läuft
+    mainClass = 'org.solbach.sudoku.Sudoku'
+}
+
+// Der entscheidende Block für die ausführbare JAR
+jar {
+    archiveFileName = 'SudokuSolver.jar'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes(
+            'Main-Class': 'org.solbach.sudoku.Sudoku'
+        )
+    }
+
+    // Packt alle Abhängigkeiten (Libraries) in die JAR
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    // Hier kannst du deine Bibliotheken hinzufügen
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}
