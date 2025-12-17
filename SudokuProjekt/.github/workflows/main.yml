@@ -1,0 +1,8 @@
+- name: Schritt 1: JAR mit Gradle bauen
+      run: ./gradlew build
+
+    - name: Schritt 2: JAR für mich speichern
+      uses: actions/upload-artifact@v4
+      with:
+        name: meine-app          # Name des Downloads
+        path: build/libs/*.jar   # Wo Gradle die Datei hingelegt hat
