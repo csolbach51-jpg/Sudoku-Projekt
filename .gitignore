@@ -1,3 +1,6 @@
+#Wird bei jedem start und mousklick erzeugt
+sudos.txt
+
 # Ignore Gradle project-specific cache directory
 .gradle
 
