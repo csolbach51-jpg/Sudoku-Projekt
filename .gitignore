@@ -6,3 +6,6 @@ sudos.txt
 
 # Ignore Gradle build output directory
 build
+
+#ignore sudos Textdatei sie wird jedesmal neu erzeugt
+sudos.txt
