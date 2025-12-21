@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.solbach'
+version = '1.0'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['SudokuProjekt/src/main/java']
+        }
+    }
+}
+
+// Wir legen die Jars in einen EIGENEN Ordner 'dist', 
+// damit der automatische 'libs'-Prozess nicht gestört wird.
+def outputDir = file("${projectDir}/SudokuProjekt/dist")
+
+jar {
+    destinationDirectory = outputDir
+    archiveFileName = 'SudokuSolver.jar'
+    manifest { attributes 'Main-Class': 'org.solbach.sudoku.Sudoku' }
+}
+
+tasks.register('firstJar', Jar) {
+    destinationDirectory = outputDir
+    archiveFileName = 'SudokuSolver-First.jar'
+    from sourceSets.main.output
+    manifest { attributes 'Main-Class': 'org.solbach.sudoku.Sudoku' }
+}
+
+tasks.register('secondJar', Jar) {
+    destinationDirectory = outputDir
+    archiveFileName = 'SudokuSolver-Print.jar'
+    from sourceSets.main.output
+    manifest { attributes 'Main-Class': 'org.solbach.sudoku.PrintSudoku' }
+}
+
+// Nur diese drei Tasks ausführen
+assemble.dependsOn firstJar, secondJar
