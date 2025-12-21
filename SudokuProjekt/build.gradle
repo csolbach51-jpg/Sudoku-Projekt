@@ -27,6 +27,29 @@ application {
     mainClass = 'org.solbach.sudoku.Sudoku'
 }
 
+
+task runToolA(type: JavaExec) {
+    group = "Execution"
+    description = "Startet Sudoku"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.solbach.sudoku.Sudoku'
+}
+
+task runToolB(type: JavaExec) {
+    group = "Execution"
+    description = "Startet Print"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'org.solbach.sudoku.PrintSudoku'
+}
+
+
+
+
+
+
+
+
+
 // Der entscheidende Block für die ausführbare JAR
 jar {
     archiveFileName = 'SudokuSolver.jar'
@@ -34,7 +57,7 @@ jar {
     
     manifest {
         attributes(
-            'Main-Class': 'org.solbach.sudoku.Sudoku'
+           'main-Class' : 'org.solbach.sudoku.Sudoku'	
         )
     }
 
