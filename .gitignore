@@ -6,3 +6,8 @@ build
 
 #ignore sudos Textdatei sie wird jedesmal neu erzeugt
 sudos.txt
+ 
+# jar Archive ignorieren
+SudokuSolver.jar
+SudokuSolver-First.jar
+SudokuSolver-Print.jar
