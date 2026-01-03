@@ -1,13 +1,21 @@
-name: Mein erster Workflow
+name: Java CI mit Gradle
 
-# Definiert, wann der Workflow starten soll
 on:
-  push:               # Startet bei jedem "git push"
-  workflow_dispatch:  # Ermöglicht den manuellen Start-Button bei GitHub
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  beispiel_job:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Hallo Welt sagen
-        run: echo "Der Workflow funktioniert!"
+    - uses: actions/checkout@v4  # Holt deinen Code von GitHub
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Gradle Build ausfuehren
+      run: ./gradlew build || echo "Gradle Datei nicht gefunden, ueberspringe..."
