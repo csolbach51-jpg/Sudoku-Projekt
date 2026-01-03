@@ -1,0 +1,13 @@
+name: Mein erster Workflow
+
+# Definiert, wann der Workflow starten soll
+on:
+  push:               # Startet bei jedem "git push"
+  workflow_dispatch:  # Ermöglicht den manuellen Start-Button bei GitHub
+
+jobs:
+  beispiel_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hallo Welt sagen
+        run: echo "Der Workflow funktioniert!"
