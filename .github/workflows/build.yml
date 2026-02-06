@@ -1,25 +1,35 @@
-name: Java CI with Gradle
+name: Java CI mit Gradle
 
 on:
   push:
+    branches: [ "main" ]
+  pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
+    - name: Code auschecken
+      uses: actions/checkout@v4
+
+    - name: Java JDK 17 einrichten
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Build with Gradle
-      run: ./gradlew shadowJar
+    - name: Gradle ausführbar machen
+      run: chmod +x gradlew
 
-    - name: Upload JAR
+    - name: Bauen mit Gradle
+      run: ./gradlew build
+
+    - name: JAR Datei speichern (Artifact)
       uses: actions/upload-artifact@v4
       with:
-        name: executable-jar
-        path: build/libs/*-all.jar
+        name: Sudoku-Spiel
+        path: build/libs/*.jar
