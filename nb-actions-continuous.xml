@@ -9,5 +9,7 @@
     </action>
     <action name="compile.single" repeatable="true"/>
     <action name="debug" repeatable="true"/>
-    <action name="run" repeatable="true"/>
+    <action name="run" repeatable="true">
+        <args>:SudokuProjekt:run</args>
+    </action>
 </actions>
