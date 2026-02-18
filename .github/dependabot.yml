@@ -1,0 +1,7 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle" # Sucht in build.gradle
+    directory: "/"
+    schedule:
+      interval: "weekly" # Prüft einmal pro Woche nach Updates
+    open-pull-requests-limit: 10
