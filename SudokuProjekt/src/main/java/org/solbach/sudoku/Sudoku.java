@@ -9,6 +9,7 @@ class FensterLauscher extends WindowAdapter
       @Override
       public void windowClosing(WindowEvent ev)
       {
+        
         System.exit(0);
       }
 }
@@ -21,6 +22,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   public TextField[][] inputs = null;
   public Button button = null;
   public Button button1 = null;
+  TextField[][] ip = null;
   public Sudoku()
   {
    inputs = new TextField[9][9];
@@ -60,7 +62,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         public void performCreate() throws IllegalArgumentException
         {
           clearMainField();
-          TextField[][] ip = new TextField[9][9];
+           ip = new TextField[9][9];
           for (int i=0;i<9;i++)
     {
       for(int j=0;j<9;j++)
@@ -76,7 +78,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                 Random rnd = new Random(cal.getTimeInMillis());
                 String dummy = ll.get(rnd.nextInt(ll.size()));
                 int x = Integer.parseInt(dummy.substring(0,1));
-                int y = Integer.valueOf(dummy.substring(1,2));
+                int y = Integer.parseInt(dummy.substring(1,2));
                 ValueAndCandidatesSudoku candis[][] = SolveEngineSudoku.setCandidates(ip);
                 int count = 0;
                 for (int i = 1;i<10;i++)
@@ -101,7 +103,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
            }
         }
 
-  @Override
+    /**
+     *
+     * @param ev
+     */
+    @Override
   public void actionPerformed(ActionEvent ev)
   {        if(ev.getSource()==button)
                        SolveEngineSudoku.solver(inputs);
@@ -109,8 +115,9 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                  {   try
                      {
                            FileWriter fs = new FileWriter("./sudos.txt");
-                     try (BufferedWriter ds = new BufferedWriter(fs)) {
-                         for(int i = 1;i<=10;i++)
+                           FileWriter hs = new FileWriter("./lösungen.txt");
+                     try (BufferedWriter ds = new BufferedWriter(fs);BufferedWriter gs = new BufferedWriter(hs)) {
+                         for(int i = 1;i<=350;i++)
                          {
                              boolean solveable = true;
                              try
@@ -122,8 +129,10 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                                  for(int k = 0;k<9;k++)
                                  {
                                      String dummy = ",";
+                                     String dummy2 = ",";
                                      for (int l=0;l<9;l++)
                                      {
+                                         dummy2=dummy2+ip[k][l].getText();
                                          if (inputs[k][l].getText().equals(""))
                                          {
                                              dummy = dummy+"0";
@@ -136,12 +145,19 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                                      ds.write(dummy);
                                      ds.newLine();
                                      
+                                     gs.write(dummy2);
+                                     gs.newLine();
                                  }
+                                 gs.newLine();
                                  ds.newLine();
                              } else {
                                  i--;
                              } // end of if-else
-                         } }
+                         
+                         }
+                         
+                     }
+                     
                 }
                     catch(IOException ex){}
                 }
@@ -159,6 +175,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   public static void main(String args[])
   {
     frame = new Sudoku();
+ //   frame.addWindowListener(new FensterLauscher());
     frame.setLayout(new FlowLayout());
     Panel raster = new Panel();
     
@@ -191,4 +208,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
     frame.setVisible(true);
 
   }
+
+  
+
 }
