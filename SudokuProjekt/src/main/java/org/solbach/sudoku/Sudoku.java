@@ -193,6 +193,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       for(int j=0;j<9;j++)
       {
         frame.inputs[i][j] = new TextField(1);
+        frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
         raster.add(frame.inputs[i][j]);
         frame.inputs[i][j].addTextListener(frame);
       }
