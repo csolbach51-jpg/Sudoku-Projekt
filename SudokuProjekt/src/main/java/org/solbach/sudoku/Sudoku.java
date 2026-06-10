@@ -166,9 +166,9 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   @Override
   public void textValueChanged(TextEvent te)
   {
-    if(((TextField)te.getSource()).getText().matches("[123456789]"));
+    if(((TextComponent)te.getSource()).getText().matches("[123456789]"));
     else
-      ((TextField)te.getSource()).setText(null);
+      ((TextComponent)te.getSource()).setText(null);
   }
 
 
