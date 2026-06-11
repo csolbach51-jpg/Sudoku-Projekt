@@ -172,7 +172,7 @@ class SolveEngineSudoku
 									if(countvaluesrow == 1)
 									{
 										int l;
-										for(l = 1;l<9;l++)
+										for(l = 1;l<10;l++)
 										if(vcs[j][l].candidates[i])
 										{
 											vcs[j][l] = new ValueAndCandidatesSudoku(i);
@@ -199,7 +199,7 @@ class SolveEngineSudoku
 									if(countvaluescolumn == 1)
 									{
 										int l;
-										for(l = 1;l<9;l++)
+										for(l = 1;l<10;l++)
 										if(vcs[l][j].candidates[i])
 										{
 											vcs[l][j] = new ValueAndCandidatesSudoku(i);
