@@ -250,4 +250,46 @@ class SolveEngineSudoku
 		}
 		return(values);
 	}
+        
+        
+        // Prüft, ob 'num' an 'row, col' gesetzt werden darf
+private static boolean isSafe(TextField[][] inputs, int row, int col, int num) {
+    String numStr = String.valueOf(num);
+    for (int i = 0; i < 9; i++) {
+        // Zeile und Spalte prüfen
+        if (inputs[row][i].getText().equals(numStr) || inputs[i][col].getText().equals(numStr)) return false;
+    }
+    // 3x3 Block prüfen
+    int startRow = row - row % 3, startCol = col - col % 3;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (inputs[i + startRow][j + startCol].getText().equals(numStr)) return false;
+        }
+    }
+    return true;
 }
+
+// Der rekursive Solver
+public static boolean solveWithBacktracking(TextField[][] inputs) {
+    for (int row = 0; row < 9; row++) {
+        for (int col = 0; col < 9; col++) {
+            if (inputs[row][col].getText().equals("")) { // Leeres Feld gefunden
+                for (int num = 1; num <= 9; num++) {
+                    if (isSafe(inputs, row, col, num)) {
+                        inputs[row][col].setText(String.valueOf(num)); // "Raten"
+
+                        if (solveWithBacktracking(inputs)) return true; // Rekursion
+
+                        inputs[row][col].setText(""); // Backtrack (Reset)
+                    }
+                }
+                return false; // Keine Zahl passt, zurück zum vorherigen Schritt
+            }
+        }
+    }
+    return true; // Alle Felder gefüllt
+}
+        
+        }
+
+

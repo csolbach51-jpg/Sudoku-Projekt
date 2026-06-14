@@ -22,10 +22,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   public TextField[][] inputs = null;
   public Button button = null;
   public Button button1 = null;
-  TextField[][] ip = null;
+  public TextField[][] ip = null;
   public Sudoku()
   {
    inputs = new TextField[9][9];
+   ip = new TextField[9][9];
    button = new Button("Start");
    button1 = new Button("Create");
    FensterLauscher fl = new FensterLauscher();
@@ -33,6 +34,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   }
         public void clearMainField()
         {
+            
                 for (int i=0;i<9;i++)
     {
       for(int j=0;j<9;j++)
@@ -124,8 +126,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                              {
                                  performCreate();
                              } catch(IllegalArgumentException ex){solveable = false;clearMainField();}
-                             if(solveable)
+                             if(!solveable)
                              {
+                                 i--;
+                             } // end of if-else
+                             else {
                                  for(int k = 0;k<9;k++)
                                  {
                                      String dummy = ",";
@@ -150,9 +155,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                                  }
                                  gs.newLine();
                                  ds.newLine();
-                             } else {
-                                 i--;
-                             } // end of if-else
+                             }
                          
                          }
                          
@@ -173,8 +176,9 @@ public class Sudoku extends Frame implements TextListener,ActionListener
 
 
   public static void main(String args[])
-  {
-    frame = new Sudoku();
+  {  Sudoku s = new Sudoku();
+    // Weise sie der statischen Variable zu
+    frame = s;
  //   frame.addWindowListener(new FensterLauscher());
     frame.setLayout(new FlowLayout());
     Panel raster = new Panel();
@@ -193,11 +197,14 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       for(int j=0;j<9;j++)
       {
         frame.inputs[i][j] = new TextField(1);
+        frame.ip[i][j] = new TextField(1);
         frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
         raster.add(frame.inputs[i][j]);
         frame.inputs[i][j].addTextListener(frame);
       }
     }
+    
+    
     frame.add(raster);
     frame.button.addActionListener(frame);
     frame.button1.addActionListener(frame);

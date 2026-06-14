@@ -32,7 +32,7 @@ class PFrame extends JFrame
             setLayout(new GridLayout(9,9));
             pack();
             setVisible(true);
-            setSize(300,300);
+            setSize(200,200);
     try
     {
      fr = new FileReader("./sudos.txt");
