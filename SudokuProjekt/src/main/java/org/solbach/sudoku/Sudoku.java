@@ -64,6 +64,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         public void performCreate() throws IllegalArgumentException
         {
           clearMainField();
+          
            ip = new TextField[9][9];
           for (int i=0;i<9;i++)
     {
