@@ -18,10 +18,15 @@ class SolveEngineSudoku
         }
         
         static boolean valuechanged = false;
+        @SuppressWarnings("empty-statement")
         static void solver(TextField[][] inputs)
         {
                         ValueAndCandidatesSudoku[][] vcs = null;
                         vcs = setCandidates(inputs);
+                        
+                        //while(!solveWithBacktracking(inputs));
+                        
+                        
 			do
 			{
                                  valuechanged = false;
