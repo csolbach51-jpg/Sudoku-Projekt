@@ -34,7 +34,6 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   }
         public void clearMainField()
         {
-            
                 for (int i=0;i<9;i++)
     {
       for(int j=0;j<9;j++)
@@ -203,8 +202,6 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         frame.inputs[i][j].addTextListener(frame);
       }
     }
-    
-    
     frame.add(raster);
     frame.button.addActionListener(frame);
     frame.button1.addActionListener(frame);
