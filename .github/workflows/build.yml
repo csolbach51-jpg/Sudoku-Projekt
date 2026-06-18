@@ -16,11 +16,12 @@ jobs:
     - name: Code auschecken
       uses: actions/checkout@v4
 
-    - name: Java JDK 17 einrichten
+    - name: Java JDK 21 einrichten
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
+        cache: 'gradle'
 
     - name: Gradle ausführbar machen
       run: chmod +x gradlew
