@@ -16,9 +16,7 @@ jobs:
     - name: Code auschecken
       uses: actions/checkout@v4
 
-    # Von Java 17 auf Java 21 aktualisiert, passend zu deinem Gradle-Projekt
-    # Zudem den Gradle-Cache aktiviert, um den Build zu beschleunigen
-    name: Java JDK 21 einrichten
+    - name: Java JDK 21 einrichten
       uses: actions/setup-java@v4
       with:
         java-version: '21'
