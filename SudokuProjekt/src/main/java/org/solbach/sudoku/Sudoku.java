@@ -76,6 +76,9 @@ public class Sudoku extends Frame implements TextListener,ActionListener
           Calendar cal = new GregorianCalendar();
           String[][] initial = new String[9][9];
           LinkedList<String> ll = testForEmpty(ip);
+          int anzahl = 35;
+          int zähler =0;
+          int count = 0;
           while ( !ll.isEmpty())
           {
                 Random rnd = new Random(cal.getTimeInMillis());
@@ -83,10 +86,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                 int x = Integer.parseInt(dummy.substring(0,1));
                 int y = Integer.parseInt(dummy.substring(1,2));
                 ValueAndCandidatesSudoku candis[][] = SolveEngineSudoku.setCandidates(ip);
-                int count = 0;
-                for (int i = 1;i<10;i++)
+                count = 0;
+                for (int i = 1;i<10;i++){
                     if(candis[x+1][y+1].candidates[i])
                                             count++;
+                }
                 int[] pso = new int[count];
                 count = 0;
                 for(int i = 1;i<10;i++)
@@ -102,71 +106,12 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                 ip[x][y].setText(initial[x][y]);
                 SolveEngineSudoku.solver(ip);
                 ll = testForEmpty(ip);
-
+            zähler++;
            }
+          
         }
 
-    /**
-     *
-     * @param ev
-     */
-    @Override
-  public void actionPerformed(ActionEvent ev)
-  {        if(ev.getSource()==button)
-                       SolveEngineSudoku.solver(inputs);
-                 else
-                 {   try
-                     {
-                           FileWriter fs = new FileWriter("./sudos.txt");
-                           FileWriter hs = new FileWriter("./lösungen.txt");
-                     try (BufferedWriter ds = new BufferedWriter(fs);BufferedWriter gs = new BufferedWriter(hs)) {
-                         for(int i = 1;i<=350;i++)
-                         {
-                             boolean solveable = true;
-                             try
-                             {
-                                 performCreate();
-                             } catch(IllegalArgumentException ex){solveable = false;clearMainField();}
-                             if(!solveable)
-                             {
-                                 i--;
-                             } // end of if-else
-                             else {
-                                 for(int k = 0;k<9;k++)
-                                 {
-                                     String dummy = ",";
-                                     String dummy2 = ",";
-                                     for (int l=0;l<9;l++)
-                                     {
-                                         dummy2=dummy2+ip[k][l].getText();
-                                         if (inputs[k][l].getText().equals(""))
-                                         {
-                                             dummy = dummy+"0";
-                                         }
-                                         else
-                                             dummy = dummy + inputs[k][l].getText();
-                                         
-                                     }
-                                     //dummy=dummy;
-                                     ds.write(dummy);
-                                     ds.newLine();
-                                     
-                                     gs.write(dummy2);
-                                     gs.newLine();
-                                 }
-                                 gs.newLine();
-                                 ds.newLine();
-                             }
-                         
-                         }
-                         
-                     }
-                     
-                }
-                    catch(IOException ex){}
-                }
-  }
-
+  
   @Override
   public void textValueChanged(TextEvent te)
   {
@@ -174,6 +119,66 @@ public class Sudoku extends Frame implements TextListener,ActionListener
     else
       ((TextComponent)te.getSource()).setText(null);
   }
+  
+  public void actionPerformed(ActionEvent ev) {        
+    if (ev.getSource() == button) {
+        SolveEngineSudoku.solver(inputs);
+    } else {    
+        try {
+            FileWriter fs = new FileWriter("./sudos.txt");
+            FileWriter hs = new FileWriter("./lösungen.txt");
+            
+            // Try-with-Resources umschließt die gesamte Generierungsschleife
+            try (BufferedWriter ds = new BufferedWriter(fs); 
+                 BufferedWriter gs = new BufferedWriter(hs)) {
+                
+                for (int i = 1; i <= 350; i++) {
+                    boolean solveable = true;
+                    try {
+                        performCreate();
+                    } catch (IllegalArgumentException ex) {
+                        solveable = false;
+                        clearMainField();
+                    }
+                    
+                    if (!solveable) {
+                        i--; // Versuch wiederholen
+                    } else {
+                        // StringBuilder für das KOMPLETTE Rätsel (81 Zeichen) vorbereiten
+                        StringBuilder dummy = new StringBuilder();
+                        StringBuilder dummy2 = new StringBuilder();
+                        
+                        for (int k = 0; k < 9; k++) {
+                            for (int l = 0; l < 9; l++) {
+                                // Lösung aufbauen
+                                dummy2.append(ip[k][l].getText());
+                                
+                                // Rätsel aufbauen
+                                if (inputs[k][l].getText().equals("")) {
+                                    dummy.append("0");
+                                } else {
+                                    dummy.append(inputs[k][l].getText());
+                                }
+                            }
+                        }
+                        
+                        // HIER sind ds und gs voll sichtbar, weil der Block noch offen ist
+                        ds.write(dummy.toString());
+                        ds.newLine();
+                        
+                        gs.write(dummy2.toString());
+                        gs.newLine();
+                    }
+                } // Ende der for-Schleife (350 Rätsel)
+                
+            } // <-- Hier schließt sich der Try-with-Resources Block (ds und gs werden geschlossen)
+            
+        } catch (IOException ex) {
+            // Optionale Fehlerbehandlung für den Dateizugriff
+            ex.printStackTrace(); 
+        }
+    }
+}
 
 
   public static void main(String args[])
