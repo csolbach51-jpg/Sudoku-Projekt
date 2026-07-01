@@ -9,6 +9,7 @@ class FensterLauscher extends WindowAdapter
       @Override
       public void windowClosing(WindowEvent ev)
       {
+        
         System.exit(0);
       }
 }
@@ -21,9 +22,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   public TextField[][] inputs = null;
   public Button button = null;
   public Button button1 = null;
+  public TextField[][] ip = null;
   public Sudoku()
   {
    inputs = new TextField[9][9];
+   ip = new TextField[9][9];
    button = new Button("Start");
    button1 = new Button("Create");
    FensterLauscher fl = new FensterLauscher();
@@ -31,6 +34,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
   }
         public void clearMainField()
         {
+            
                 for (int i=0;i<9;i++)
     {
       for(int j=0;j<9;j++)
@@ -60,7 +64,8 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         public void performCreate() throws IllegalArgumentException
         {
           clearMainField();
-          TextField[][] ip = new TextField[9][9];
+          
+           ip = new TextField[9][9];
           for (int i=0;i<9;i++)
     {
       for(int j=0;j<9;j++)
@@ -71,17 +76,21 @@ public class Sudoku extends Frame implements TextListener,ActionListener
           Calendar cal = new GregorianCalendar();
           String[][] initial = new String[9][9];
           LinkedList<String> ll = testForEmpty(ip);
+          int anzahl = 35;
+          int zähler =0;
+          int count = 0;
           while ( !ll.isEmpty())
           {
                 Random rnd = new Random(cal.getTimeInMillis());
                 String dummy = ll.get(rnd.nextInt(ll.size()));
                 int x = Integer.parseInt(dummy.substring(0,1));
-                int y = Integer.valueOf(dummy.substring(1,2));
+                int y = Integer.parseInt(dummy.substring(1,2));
                 ValueAndCandidatesSudoku candis[][] = SolveEngineSudoku.setCandidates(ip);
-                int count = 0;
-                for (int i = 1;i<10;i++)
+                count = 0;
+                for (int i = 1;i<10;i++){
                     if(candis[x+1][y+1].candidates[i])
                                             count++;
+                }
                 int[] pso = new int[count];
                 count = 0;
                 for(int i = 1;i<10;i++)
@@ -97,68 +106,86 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                 ip[x][y].setText(initial[x][y]);
                 SolveEngineSudoku.solver(ip);
                 ll = testForEmpty(ip);
-
+            zähler++;
            }
+          
         }
 
-  @Override
-  public void actionPerformed(ActionEvent ev)
-  {        if(ev.getSource()==button)
-                       SolveEngineSudoku.solver(inputs);
-                 else
-                 {   try
-                     {
-                           FileWriter fs = new FileWriter("./sudos.txt");
-                     try (BufferedWriter ds = new BufferedWriter(fs)) {
-                         for(int i = 1;i<=10;i++)
-                         {
-                             boolean solveable = true;
-                             try
-                             {
-                                 performCreate();
-                             } catch(IllegalArgumentException ex){solveable = false;clearMainField();}
-                             if(solveable)
-                             {
-                                 for(int k = 0;k<9;k++)
-                                 {
-                                     String dummy = ",";
-                                     for (int l=0;l<9;l++)
-                                     {
-                                         if (inputs[k][l].getText().equals(""))
-                                         {
-                                             dummy = dummy+"0";
-                                         }
-                                         else
-                                             dummy = dummy + inputs[k][l].getText();
-                                         
-                                     }
-                                     //dummy=dummy;
-                                     ds.write(dummy);
-                                     ds.newLine();
-                                     
-                                 }
-                                 ds.newLine();
-                             } else {
-                                 i--;
-                             } // end of if-else
-                         } }
-                }
-                    catch(IOException ex){}
-                }
-  }
-
+  
   @Override
   public void textValueChanged(TextEvent te)
   {
-    if(((TextField)te.getSource()).getText().matches("[123456789]"));
+    if(((TextComponent)te.getSource()).getText().matches("[123456789]"));
     else
-      ((TextField)te.getSource()).setText(null);
+      ((TextComponent)te.getSource()).setText(null);
   }
+  
+  public void actionPerformed(ActionEvent ev) {        
+    if (ev.getSource() == button) {
+        SolveEngineSudoku.solver(inputs);
+    } else {    
+        try {
+            FileWriter fs = new FileWriter("./sudos.txt");
+            FileWriter hs = new FileWriter("./lösungen.txt");
+            
+            // Try-with-Resources umschließt die gesamte Generierungsschleife
+            try (BufferedWriter ds = new BufferedWriter(fs); 
+                 BufferedWriter gs = new BufferedWriter(hs)) {
+                
+                for (int i = 1; i <= 350; i++) {
+                    boolean solveable = true;
+                    try {
+                        performCreate();
+                    } catch (IllegalArgumentException ex) {
+                        solveable = false;
+                        clearMainField();
+                    }
+                    
+                    if (!solveable) {
+                        i--; // Versuch wiederholen
+                    } else {
+                        // StringBuilder für das KOMPLETTE Rätsel (81 Zeichen) vorbereiten
+                        StringBuilder dummy = new StringBuilder();
+                        StringBuilder dummy2 = new StringBuilder();
+                        
+                        for (int k = 0; k < 9; k++) {
+                            for (int l = 0; l < 9; l++) {
+                                // Lösung aufbauen
+                                dummy2.append(ip[k][l].getText());
+                                
+                                // Rätsel aufbauen
+                                if (inputs[k][l].getText().equals("")) {
+                                    dummy.append("0");
+                                } else {
+                                    dummy.append(inputs[k][l].getText());
+                                }
+                            }
+                        }
+                        
+                        // HIER sind ds und gs voll sichtbar, weil der Block noch offen ist
+                        ds.write(dummy.toString());
+                        ds.newLine();
+                        
+                        gs.write(dummy2.toString());
+                        gs.newLine();
+                    }
+                } // Ende der for-Schleife (350 Rätsel)
+                
+            } // <-- Hier schließt sich der Try-with-Resources Block (ds und gs werden geschlossen)
+            
+        } catch (IOException ex) {
+            // Optionale Fehlerbehandlung für den Dateizugriff
+            ex.printStackTrace(); 
+        }
+    }
+}
 
 
   public static void main(String args[])
-  {
-    frame = new Sudoku();
+  {  Sudoku s = new Sudoku();
+    // Weise sie der statischen Variable zu
+    frame = s;
+ //   frame.addWindowListener(new FensterLauscher());
     frame.setLayout(new FlowLayout());
     Panel raster = new Panel();
     
@@ -176,10 +203,14 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       for(int j=0;j<9;j++)
       {
         frame.inputs[i][j] = new TextField(1);
+        frame.ip[i][j] = new TextField(1);
+        frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
         raster.add(frame.inputs[i][j]);
         frame.inputs[i][j].addTextListener(frame);
       }
     }
+    
+    
     frame.add(raster);
     frame.button.addActionListener(frame);
     frame.button1.addActionListener(frame);
@@ -191,4 +222,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
     frame.setVisible(true);
 
   }
+
+  
+
 }

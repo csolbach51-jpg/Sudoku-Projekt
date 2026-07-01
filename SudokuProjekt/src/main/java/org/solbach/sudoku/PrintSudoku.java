@@ -54,7 +54,7 @@ class PrintSudoku implements Printable
   {
     if(index >= 0)
     {
-    gr.translate( 100,80);
+    gr.translate( 200,80);
     pframe.print(gr);
 
             out.println(index);
@@ -86,7 +86,7 @@ class PrintSudoku implements Printable
           return NO_SUCH_PAGE;
        }
 
-    //gr.translate(0,340);
+    gr.translate(0,350);
     try
     {
               pframe.print(gr);
@@ -98,9 +98,9 @@ class PrintSudoku implements Printable
       public static void main(String args[]) throws PrinterException
       {
             pframe = new PFrame();
-            pframe.setMinimumSize(new Dimension(400,400));
-            pframe.setMaximumSize(new Dimension(400,400));
-            pframe.setPreferredSize(new Dimension(400,400));
+            pframe.setMinimumSize(new Dimension(300,300));
+            pframe.setMaximumSize(new Dimension(300,300));
+            pframe.setPreferredSize(new Dimension(300,300));
             var ps = new PrintSudoku();
             var pj = getPrinterJob(); 
             pj.printDialog();
