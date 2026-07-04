@@ -3,7 +3,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 import java.io.*;
-
+import javax.swing.*;
 class FensterLauscher extends WindowAdapter
 {
       @Override
@@ -19,14 +19,14 @@ public class Sudoku extends Frame implements TextListener,ActionListener
 
 
   public static Sudoku frame = null;
-  public TextField[][] inputs = null;
+  public JTextField[][] inputs = null;
   public Button button = null;
   public Button button1 = null;
-  public TextField[][] ip = null;
+  public JTextField[][] ip = null;
   public Sudoku()
   {
-   inputs = new TextField[9][9];
-   ip = new TextField[9][9];
+   inputs = new JTextField[9][9];
+   ip = new JTextField[9][9];
    button = new Button("Start");
    button1 = new Button("Create");
    FensterLauscher fl = new FensterLauscher();
@@ -43,8 +43,53 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       }
     }
         }
+        
+      public void performCreate() {
+    // 1. Spielfeld komplett leeren
+    clearMainField();
 
-        public LinkedList testForEmpty(TextField[][] inputs)
+    // 2. Die erste Zeile zufällig mit Zahlen von 1 bis 9 belegen,
+    // damit jedes der 350 Rätsel absolut einzigartig wird
+    java.util.List<Integer> numbers = java.util.Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    java.util.Collections.shuffle(numbers);
+    for (int c = 0; c < 9; c++) {
+        inputs[0][c].setText(String.valueOf(numbers.get(c)));
+    }
+
+    // 3. Den Backtracking-Solver das Spielfeld VOLLSTÄNDIG ausfüllen lassen
+    // Da die erste Zeile gewürfelt wurde, baut er uns jedes Mal ein neues, perfektes Muster
+    SolveEngineSudoku.solveWithBacktracking(inputs);
+
+    // 4. Die Lösung in das 'ip'-Array sichern, damit dein Export (lösungen.txt) sie findet
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            ip[r][c].setText(inputs[r][c].getText());
+        }
+    }
+
+    // 5. Jetzt "kratzen" wir Zahlen für das eigentliche Rätsel heraus!
+    // Für ein echtes "Master"-Sudoku lassen wir ca. 24 Zahlen stehen (wir löschen also 57)
+    int ziffernZuLoeschen =46; 
+    java.util.Random rand = new java.util.Random();
+    
+    while (ziffernZuLoeschen > 0) {
+        int r = rand.nextInt(9);
+        int c = rand.nextInt(9);
+        
+        // Nur löschen, wenn das Feld nicht schon leer ist
+        if (!inputs[r][c].getText().equals("")) {
+            inputs[r][c].setText("");
+            ziffernZuLoeschen--;
+        }
+        
+        
+    }
+    
+    // Das Rätsel steht jetzt spielbereit in 'inputs', 
+    // und die vollständige Lösung ist sicher in 'ip' hinterlegt!
+}
+
+        public LinkedList testForEmpty(JTextField[][] inputs)
         {
                @SuppressWarnings("unchecked")
                LinkedList<String> ll = new LinkedList();
@@ -61,55 +106,9 @@ public class Sudoku extends Frame implements TextListener,ActionListener
                }
                return(ll);
         }
-        public void performCreate() throws IllegalArgumentException
-        {
-          clearMainField();
+       
           
-           ip = new TextField[9][9];
-          for (int i=0;i<9;i++)
-    {
-      for(int j=0;j<9;j++)
-      {
-                                ip[i][j] = new TextField(1);
-      }
-    }
-          Calendar cal = new GregorianCalendar();
-          String[][] initial = new String[9][9];
-          LinkedList<String> ll = testForEmpty(ip);
-          int anzahl = 35;
-          int zähler =0;
-          int count = 0;
-          while ( !ll.isEmpty())
-          {
-                Random rnd = new Random(cal.getTimeInMillis());
-                String dummy = ll.get(rnd.nextInt(ll.size()));
-                int x = Integer.parseInt(dummy.substring(0,1));
-                int y = Integer.parseInt(dummy.substring(1,2));
-                ValueAndCandidatesSudoku candis[][] = SolveEngineSudoku.setCandidates(ip);
-                count = 0;
-                for (int i = 1;i<10;i++){
-                    if(candis[x+1][y+1].candidates[i])
-                                            count++;
-                }
-                int[] pso = new int[count];
-                count = 0;
-                for(int i = 1;i<10;i++)
-                     if(candis[x+1][y+1].candidates[i])
-                     {
-                                             pso[count] = i;
-                                             count++;
-                     }
-                String test = Integer.toString(pso[rnd.nextInt(pso.length)]);
-                initial[x][y] = test;
-                //System.out.println(test);
-                inputs[x][y].setText(initial[x][y]);
-                ip[x][y].setText(initial[x][y]);
-                SolveEngineSudoku.solver(ip);
-                ll = testForEmpty(ip);
-            zähler++;
-           }
-          
-        }
+        
 
   
   @Override
@@ -120,67 +119,73 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       ((TextComponent)te.getSource()).setText(null);
   }
   
-  public void actionPerformed(ActionEvent ev) {        
-    if (ev.getSource() == button) {
-        SolveEngineSudoku.solver(inputs);
-    } else {    
-        try {
-            FileWriter fs = new FileWriter("./sudos.txt");
-            FileWriter hs = new FileWriter("./lösungen.txt");
-            
-            // Try-with-Resources umschließt die gesamte Generierungsschleife
-            try (BufferedWriter ds = new BufferedWriter(fs); 
-                 BufferedWriter gs = new BufferedWriter(hs)) {
-                
+    /**
+     *
+     * @param e
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == button1)  { 
+            try {
+                // Die beiden Dateien für den Export öffnen
+                java.io.FileWriter writerSudos = new java.io.FileWriter("sudos.txt");
+                java.io.FileWriter writerLoesungen = new java.io.FileWriter("lösungen.txt");
+
+                // Schleife für die 350 Rätsel
                 for (int i = 1; i <= 350; i++) {
-                    boolean solveable = true;
-                    try {
-                        performCreate();
-                    } catch (IllegalArgumentException ex) {
-                        solveable = false;
-                        clearMainField();
-                    }
                     
-                    if (!solveable) {
-                        i--; // Versuch wiederholen
-                    } else {
-                        // StringBuilder für das KOMPLETTE Rätsel (81 Zeichen) vorbereiten
-                        StringBuilder dummy = new StringBuilder();
-                        StringBuilder dummy2 = new StringBuilder();
-                        
-                        for (int k = 0; k < 9; k++) {
-                            for (int l = 0; l < 9; l++) {
-                                // Lösung aufbauen
-                                dummy2.append(ip[k][l].getText());
-                                
-                                // Rätsel aufbauen
-                                if (inputs[k][l].getText().equals("")) {
-                                    dummy.append("0");
-                                } else {
-                                    dummy.append(inputs[k][l].getText());
-                                }
+                    // 1. Rätsel und Lösung gleichzeitig generieren
+                    performCreate(); 
+
+                    // 2. Das generierte Rätsel (mit Nullen für leere Felder) auslesen
+                    StringBuilder raetselString = new StringBuilder();
+                    for (int r = 0; r < 9; r++) {
+                        for (int c = 0; c < 9; c++) {
+                            String s = inputs[r][c].getText();
+                            if (s.equals("")) {
+                                raetselString.append("0");
+                            } else {
+                                raetselString.append(s);
                             }
                         }
-                        
-                        // HIER sind ds und gs voll sichtbar, weil der Block noch offen ist
-                        ds.write(dummy.toString());
-                        ds.newLine();
-                        
-                        gs.write(dummy2.toString());
-                        gs.newLine();
                     }
-                } // Ende der for-Schleife (350 Rätsel)
+
+                    // 3. Die fertige Lösung aus dem 'ip'-Gitter auslesen
+                    StringBuilder loesungsString = new StringBuilder();
+                    for (int r = 0; r < 9; r++) {
+                        for (int c = 0; c < 9; c++) {
+                            String s = ip[r][c].getText();
+                            loesungsString.append(s);
+                        }
+                    }
+
+                    // 4. In die jeweiligen Textdateien schreiben
+                    writerSudos.write(raetselString.toString() + "\n");
+                    writerLoesungen.write(loesungsString.toString() + "\n");
+                }
+
+                // Nach der Schleife die Streams sauber schließen
+                writerSudos.close();
+                writerLoesungen.close();
                 
-            } // <-- Hier schließt sich der Try-with-Resources Block (ds und gs werden geschlossen)
+                System.out.println("350 Master-Sudokus erfolgreich generiert!");
+
+            } catch (java.io.IOException ex) {
+                ex.printStackTrace();
+            }
+        }    
+            else if (button == e.getSource()) { 
+            // Ruft deine Backtracking-Engine auf, die das Gitter im Fenster live ausfüllt!
+            SolveEngineSudoku.solver(inputs); 
+            System.out.println("Sudoku erfolgreich im Fenster aufgelöst!");
+        
+    
             
-        } catch (IOException ex) {
-            // Optionale Fehlerbehandlung für den Dateizugriff
-            ex.printStackTrace(); 
         }
     }
-}
+    
 
-
+    
   public static void main(String args[])
   {  Sudoku s = new Sudoku();
     // Weise sie der statischen Variable zu
@@ -202,11 +207,11 @@ public class Sudoku extends Frame implements TextListener,ActionListener
     {
       for(int j=0;j<9;j++)
       {
-        frame.inputs[i][j] = new TextField(1);
-        frame.ip[i][j] = new TextField(1);
+        frame.inputs[i][j] = new JTextField(1);
+        frame.ip[i][j] = new JTextField(1);
         frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
         raster.add(frame.inputs[i][j]);
-        frame.inputs[i][j].addTextListener(frame);
+       frame.inputs[i][j].addActionListener(frame);
       }
     }
     
