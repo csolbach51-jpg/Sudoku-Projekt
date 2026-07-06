@@ -3,7 +3,7 @@ package org.solbach.sudoku;
 import java.util.*;
 import java.awt.*;
 import static java.util.Arrays.deepEquals;
-
+import javax.swing.*;
 class SolveEngineSudoku
 {
 
@@ -18,91 +18,69 @@ class SolveEngineSudoku
         }
         
         static boolean valuechanged = false;
-        @SuppressWarnings("empty-statement")
-        static void solver(TextField[][] inputs)
-        {
-                        ValueAndCandidatesSudoku[][] vcs = null;
-                        vcs = setCandidates(inputs);
-                        
-                        //while(!solveWithBacktracking(inputs));
-                        
-                        
-			do
-			{
-                                 valuechanged = false;
-
-
-
-				 for(var i = 1;i<10;i++)
-				 {
-				 	for(var k = 1;k<10;k++)
-					{
-
-				 		vcs[i][k] = solveLonelys(vcs[i][k]);
-
-
-						if(vcs[i][k].candidates[0]!= true)
-						{
-							inputs[i-1][k-1].setText(vcs[i][k].result.toString());
-							vcs = setCandidates(inputs);
-
-						}
-
-					}
-     }
-
-				vcs = setCandidates(inputs);
-				vcs = solveRow(vcs);
-				for (var i = 1;i<10;i++)
-				{
-					for(var k = 1;k<10;k++)
-					{
-						if(vcs[i][k].candidates[0]!= true)
-						{
-                                                  inputs[i-1][k-1].setText(vcs[i][k].result.toString());
-						}
-					}
-				}
-				vcs = setCandidates(inputs);
-				vcs = solveColumn(vcs);
-				for (var i = 1;i<10;i++)
-				{
-					for(var k = 1;k<10;k++)
-					{
-						if(vcs[i][k].candidates[0]!= true)
-						{
-                                                  inputs[i-1][k-1].setText(vcs[i][k].result.toString());
-						}
-					}
-				}
-				vcs = setCandidates(inputs);
-				vcs = solveRect(vcs);
-				for (var i = 1;i<10;i++)
-				{
-					for(var k = 1;k<10;k++)
-					{
-						if(vcs[i][k].candidates[0]!= true)
-						{
-							inputs[i-1][k-1].setText(vcs[i][k].result.toString());
-						}
-					}
-				}
-			/*	vcs = setCandidates(inputs);
-				for (int i = 1;i<10;i++)
-				{
-					for(int k = 1;k<10;k++)
-					{
-						if(vcs[i][k].candidates[0]!= true)
-							inputs[i-1][k-1].setText(vcs[i][k].result.toString());
-					}
-				}*/
-
-		        //	vcs = setCandidates(inputs);
-			}
-			while(valuechanged);
-		//	System.out.println("fertig");
+        
+public static boolean solver(javax.swing.JTextField[][] inputs)
+{
+    // 1. Wir kopieren den aktuellen Zustand der GUI in ein einfaches int-Array
+    int[][] grid = new int[9][9];
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            String txt = inputs[r][c].getText();
+            grid[r][c] = txt.equals("") ? 0 : Integer.parseInt(txt);
         }
+    }
 
+    // 2. Wir lassen den Backtracking-Solver auf diesem int-Array arbeiten.
+    // Falls deine Backtracking-Methode anders heißt (z.B. solveWithBacktracking), den Namen hier anpassen!
+    boolean success = solveIntegerGrid(grid); 
+    
+    if (!success) {
+        // Wenn das Rätsel unlösbar ist, geben wir false zurück, damit Sudoku.java es merkt
+        return false;
+    }
+
+    // 3. NUR WENN ERFOLGREICH: Schreiben wir die fertige Lösung in die GUI zurück
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            inputs[r][c].setText(String.valueOf(grid[r][c]));
+        }
+    }
+    
+    return true; // Erfolgreich gelöst!
+}
+
+// Hilfsmethode für das Backtracking auf dem int-Array
+private static boolean solveIntegerGrid(int[][] grid) {
+    for (int row = 0; row < 9; row++) {
+        for (int col = 0; col < 9; col++) {
+            if (grid[row][col] == 0) {
+                for (int num = 1; num <= 9; num++) {
+                    if (isGridSafe(grid, row, col, num)) {
+                        grid[row][col] = num;
+                        if (solveIntegerGrid(grid)) return true;
+                        grid[row][col] = 0; // Backtrack
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Eigene isSafe-Prüfung für das int-Array
+private static boolean isGridSafe(int[][] grid, int row, int col, int num) {
+    for (int i = 0; i < 9; i++) {
+        if (grid[row][i] == num || grid[i][col] == num) return false;
+    }
+    int startRow = row - row % 3, startCol = col - col % 3;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (grid[i + startRow][j + startCol] == num) return false;
+        }
+    }
+    return true;
+}                        
 
 	static ValueAndCandidatesSudoku solveLonelys(ValueAndCandidatesSudoku vcs)
 					{
@@ -218,7 +196,8 @@ class SolveEngineSudoku
 
 
 
-	static ValueAndCandidatesSudoku[][] setCandidates(TextField[][] inputs)
+        
+	static ValueAndCandidatesSudoku[][] setCandidates(JTextField[][] inputs)
 	{
 		var values = new ValueAndCandidatesSudoku[10][10];
 		for(var i = 1;i<10;i++)
@@ -258,7 +237,7 @@ class SolveEngineSudoku
         
         
         // Prüft, ob 'num' an 'row, col' gesetzt werden darf
-private static boolean isSafe(TextField[][] inputs, int row, int col, int num) {
+ static boolean isSafe(JTextField[][] inputs, int row, int col, int num) {
     String numStr = String.valueOf(num);
     for (int i = 0; i < 9; i++) {
         // Zeile und Spalte prüfen
@@ -275,7 +254,7 @@ private static boolean isSafe(TextField[][] inputs, int row, int col, int num) {
 }
 
 // Der rekursive Solver
-public static boolean solveWithBacktracking(TextField[][] inputs) {
+public static boolean solveWithBacktracking(JTextField[][] inputs) {
     for (int row = 0; row < 9; row++) {
         for (int col = 0; col < 9; col++) {
             if (inputs[row][col].getText().equals("")) { // Leeres Feld gefunden
