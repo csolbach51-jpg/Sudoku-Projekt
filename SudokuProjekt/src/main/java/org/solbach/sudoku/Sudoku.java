@@ -69,7 +69,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
 
     // 5. Jetzt "kratzen" wir Zahlen für das eigentliche Rätsel heraus!
     // Für ein echtes "Master"-Sudoku lassen wir ca. 24 Zahlen stehen (wir löschen also 57)
-    int ziffernZuLoeschen =46; 
+    int ziffernZuLoeschen =36; 
     java.util.Random rand = new java.util.Random();
     
     while (ziffernZuLoeschen > 0) {
@@ -128,8 +128,8 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         if (e.getSource() == button1)  { 
             try {
                 // Die beiden Dateien für den Export öffnen
-                java.io.FileWriter writerSudos = new java.io.FileWriter("sudos.txt");
-                java.io.FileWriter writerLoesungen = new java.io.FileWriter("lösungen.txt");
+                java.io.FileWriter writerSudos = new java.io.FileWriter("/home/csolbach51/Sudokubuch/sudos.txt");
+                java.io.FileWriter writerLoesungen = new java.io.FileWriter("/home/csolbach51/Sudokubuch/lösungen.txt");
 
                 // Schleife für die 350 Rätsel
                 for (int i = 1; i <= 350; i++) {
@@ -211,6 +211,14 @@ public class Sudoku extends Frame implements TextListener,ActionListener
         frame.ip[i][j] = new JTextField(1);
         frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
         raster.add(frame.inputs[i][j]);
+        
+        // Falls Sie JTextField (Swing) nutzen:
+frame.inputs[i][j].setFocusTraversalKeysEnabled(true);
+
+// UND absolut sicherstellen, dass das Feld den Fokus erhalten darf:
+frame.inputs[i][j].setFocusable(true);
+        
+        
        frame.inputs[i][j].addActionListener(frame);
       }
     }
