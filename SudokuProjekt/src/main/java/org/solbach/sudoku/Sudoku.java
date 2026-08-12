@@ -43,8 +43,85 @@ public class Sudoku extends Frame implements TextListener,ActionListener
       }
     }
         }
+     
+  private int[][] convertInputsToIntArray(javax.swing.JTextField[][] inputs) {
+    int[][] board = new int[9][9];
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            String val = inputs[r][c].getText();
+            board[r][c] = (val == null || val.trim().isEmpty()) ? 0 : Integer.parseInt(val.trim());
+        }
+    }
+    return board;
+}
         
-      public void performCreate() {
+        
+        public void performCreate() {
+    // 1. Spielfeld komplett leeren
+    clearMainField();
+
+    // 2. Die erste Zeile zufällig belegen
+    java.util.List<Integer> numbers = java.util.Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    java.util.Collections.shuffle(numbers);
+    for (int c = 0; c < 9; c++) {
+        inputs[0][c].setText(String.valueOf(numbers.get(c)));
+    }
+
+    // 3. Den Backtracking-Solver das Feld vollständig ausfüllen lassen
+    SolveEngineSudoku.solveWithBacktracking(inputs);
+
+    // 4. Die vollständige Lösung in das 'ip'-Array sichern
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            ip[r][c].setText(inputs[r][c].getText());
+        }
+    }
+
+    // 5. Zahlen herauskratzen – ABER MIT EINDEUTIGKEITSPRÜFUNG
+    // Für "Master" ca. 57 löschen (24 bleiben stehen), für einfacher z.B. 36
+    int ziffernZuLoeschen = 31; 
+
+    // Alle 81 Positionen erzeugen und zufällig durchmischen
+    java.util.List<int[]> positions = new java.util.ArrayList<>();
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            positions.add(new int[]{r, c});
+        }
+    }
+    java.util.Collections.shuffle(positions);
+
+    // Positionen nacheinander durchgehen
+    for (int[] pos : positions) {
+        if (ziffernZuLoeschen <= 0) {
+            break; // Zielanzahl an gelöschten Feldern erreicht
+        }
+
+        int r = pos[0];
+        int c = pos[1];
+
+        String tempText = inputs[r][c].getText();
+        if (tempText.equals("")) {
+            continue;
+        }
+
+        // Versuchsweise entfernen
+        inputs[r][c].setText("");
+
+        // In ein int[][]-Grid umwandeln und auf Eindeutigkeit prüfen
+        int[][] currentBoard = convertInputsToIntArray(inputs);
+
+        if (SudokuChecker.countSolutions(SudokuChecker.deepCopy(currentBoard)) != 1) {
+            // Mehr als 1 Lösung (oder 0)! Wieder rückgängig machen
+            inputs[r][c].setText(tempText);
+        } else {
+            // Eindeutigkeit bleibt gewahrt -> Löschen erfolgreich
+            ziffernZuLoeschen--;
+        }
+    }
+}
+        
+        
+   /*   public void performCreate() {
     // 1. Spielfeld komplett leeren
     clearMainField();
 
@@ -87,7 +164,7 @@ public class Sudoku extends Frame implements TextListener,ActionListener
     
     // Das Rätsel steht jetzt spielbereit in 'inputs', 
     // und die vollständige Lösung ist sicher in 'ip' hinterlegt!
-}
+}*/
 
         public LinkedList testForEmpty(JTextField[][] inputs)
         {
