@@ -66,15 +66,15 @@ class PrintSudoku implements Printable
             //((Graphics2D)gr).transform(conf.getNormalizingTransform());
             try
             {
-              for (var i = 0;i<9;i++)
+              for (var i = 0;i<81;i++)
               {
                    var values = pframe.br.readLine();
                    for (var k = 0;k<9;k++)
                    {
-                       if(values.substring(k+1,k+2).equals("0"))
-                        pframe.entry[i][k].setText(" ");
+                       if(values.substring(k,k+1).equals("0"))
+                        pframe.entry[i%9][k].setText(" ");
                        else
-                        pframe.entry[i][k].setText(values.substring(k+1,k+2));
+                        pframe.entry[i%9][k].setText(values.substring((k),(k)+1));
                    }
 
               }
