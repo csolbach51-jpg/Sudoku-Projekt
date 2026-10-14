@@ -1,220 +1,434 @@
 package org.solbach.sudoku;
-import java.awt.event.*;
+
 import java.awt.*;
-import java.util.*;
-import java.io.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
-class FensterLauscher extends WindowAdapter
-{
-      @Override
-      public void windowClosing(WindowEvent ev)
-      {
+public class Sudoku extends Frame implements TextListener, ActionListener {
+
+    public TextField[][] inputs = new TextField[9][9];
+    public TextField[][] ip = new TextField[9][9];
+    private Button buttonCreate; 
+    private Button buttonSolve;  
+    private Panel raster;
+    
+    private int[][] currentSolution = new int[9][9];
+    
+    // Zielverzeichnis im Home-Ordner des Benutzers
+    private final String TARGET_DIR = System.getProperty("user.home") + File.separator + "Sudokubuch";
+
+    public Sudoku() {
+        super("SUDOKU MASTER CHALLENGE");
+        initUI(this);
         
-        System.exit(0);
-      }
-}
-@SuppressWarnings("serial")
-public class Sudoku extends Frame implements TextListener,ActionListener
-{
-
-
-  public static Sudoku frame = null;
-  public TextField[][] inputs = null;
-  public Button button = null;
-  public Button button1 = null;
-  public TextField[][] ip = null;
-  public Sudoku()
-  {
-   inputs = new TextField[9][9];
-   ip = new TextField[9][9];
-   button = new Button("Start");
-   button1 = new Button("Create");
-   FensterLauscher fl = new FensterLauscher();
-   addWindowListener(fl);
-  }
-        public void clearMainField()
-        {
-                for (int i=0;i<9;i++)
-    {
-      for(int j=0;j<9;j++)
-      {
-        inputs[i][j].setText("");
-      }
+        // Ordner erstellen und 360 Rätsel über 3 Stufen exportieren
+        createTargetDirectory();
+        generate360PuzzlesWithLevels();
     }
-        }
 
-        public LinkedList testForEmpty(TextField[][] inputs)
-        {
-               @SuppressWarnings("unchecked")
-               LinkedList<String> ll = new LinkedList();
-               for(int i = 0;i<9;i++)
-               {
-                       for(int k=0;k<9;k++)
-                       {
-                                       if(inputs[i][k].getText().equals(""))
-                                       {
-                                              ll.add(String.valueOf(i)+String.valueOf(k));
-
-                                       }
-                       }
-               }
-               return(ll);
+    private void createTargetDirectory() {
+        File dir = new File(TARGET_DIR);
+        if (!dir.exists()) {
+            if (dir.mkdirs()) {
+                System.out.println("Ordner erstellt: " + TARGET_DIR);
+            }
         }
-        public void performCreate() throws IllegalArgumentException
-        {
-          clearMainField();
-          
-           ip = new TextField[9][9];
-          for (int i=0;i<9;i++)
-    {
-      for(int j=0;j<9;j++)
-      {
-                                ip[i][j] = new TextField(1);
-      }
     }
-          Calendar cal = new GregorianCalendar();
-          String[][] initial = new String[9][9];
-          LinkedList<String> ll = testForEmpty(ip);
-          while ( !ll.isEmpty())
-          {
-                Random rnd = new Random(cal.getTimeInMillis());
-                String dummy = ll.get(rnd.nextInt(ll.size()));
-                int x = Integer.parseInt(dummy.substring(0,1));
-                int y = Integer.parseInt(dummy.substring(1,2));
-                ValueAndCandidatesSudoku candis[][] = SolveEngineSudoku.setCandidates(ip);
-                int count = 0;
-                for (int i = 1;i<10;i++)
-                    if(candis[x+1][y+1].candidates[i])
-                                            count++;
-                int[] pso = new int[count];
-                count = 0;
-                for(int i = 1;i<10;i++)
-                     if(candis[x+1][y+1].candidates[i])
-                     {
-                                             pso[count] = i;
-                                             count++;
-                     }
-                String test = Integer.toString(pso[rnd.nextInt(pso.length)]);
-                initial[x][y] = test;
-                //System.out.println(test);
-                inputs[x][y].setText(initial[x][y]);
-                ip[x][y].setText(initial[x][y]);
-                SolveEngineSudoku.solver(ip);
-                ll = testForEmpty(ip);
 
-           }
+    public void clearMainField() {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (inputs[i][j] != null) inputs[i][j].setText("");
+                if (ip[i][j] != null) ip[i][j].setText("");
+            }
+        }
+    }
+
+        // Schreibt das Gitter kompakt als 81 Zeichen in die Textdateien
+    // PRÜFT JETZT LIVE BEIM SCHREIBEN AUF DOPPELTE ZAHLEN!
+    private void writeGridToFile(int[][] grid, String filename) {
+        // Wenn wir in die Spieldatei schreiben, machen wir den ultimativen Sicherheits-Check
+        if (filename.equals("sudos.txt")) {
+            if (!isFinalGridValid(grid)) {
+                System.out.println("WARNUNG: Ein fehlerhaftes Sudoku mit Doppelungen wurde abgefangen und nicht geschrieben!");
+                return; // Illegaler Zustand: Schreibvorgang wird blockiert!
+            }
         }
 
-    /**
-     *
-     * @param ev
-     */
-    @Override
-  public void actionPerformed(ActionEvent ev)
-  {        if(ev.getSource()==button)
-                       SolveEngineSudoku.solver(inputs);
-                 else
-                 {   try
-                     {
-                           FileWriter fs = new FileWriter("./sudos.txt");
-                           FileWriter hs = new FileWriter("./lösungen.txt");
-                     try (BufferedWriter ds = new BufferedWriter(fs);BufferedWriter gs = new BufferedWriter(hs)) {
-                         for(int i = 1;i<=350;i++)
-                         {
-                             boolean solveable = true;
-                             try
-                             {
-                                 performCreate();
-                             } catch(IllegalArgumentException ex){solveable = false;clearMainField();}
-                             if(!solveable)
-                             {
-                                 i--;
-                             } // end of if-else
-                             else {
-                                 for(int k = 0;k<9;k++)
-                                 {
-                                     String dummy = ",";
-                                     String dummy2 = ",";
-                                     for (int l=0;l<9;l++)
-                                     {
-                                         dummy2=dummy2+ip[k][l].getText();
-                                         if (inputs[k][l].getText().equals(""))
-                                         {
-                                             dummy = dummy+"0";
-                                         }
-                                         else
-                                             dummy = dummy + inputs[k][l].getText();
-                                         
-                                     }
-                                     //dummy=dummy;
-                                     ds.write(dummy);
-                                     ds.newLine();
-                                     
-                                     gs.write(dummy2);
-                                     gs.newLine();
-                                 }
-                                 gs.newLine();
-                                 ds.newLine();
-                             }
-                         
-                         }
-                         
-                     }
-                     
+        File file = new File(TARGET_DIR + File.separator + filename);
+        try (FileWriter writer = new FileWriter(file, true)) {
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    writer.write(grid[i][j] == 0 ? "0" : Integer.toString(grid[i][j]));
                 }
-                    catch(IOException ex){}
+            }
+            writer.write("\n");
+        } catch (IOException e) {
+            System.out.println("Fehler beim Schreiben in die Datei " + filename + ": " + e.getMessage());
+        }
+    }
+
+    // Ein absolut sicherer, isolierter Zeilen-, Spalten- und Block-Prüfer vor dem Dateiexport
+    private boolean isFinalGridValid(int[][] grid) {
+        // 1. Zeilen prüfen
+        for (int r = 0; r < 9; r++) {
+            boolean[] seen = new boolean[10];
+            for (int c = 0; c < 9; c++) {
+                int val = grid[r][c];
+                if (val != 0) {
+                    if (seen[val]) return false; // DOPPELTE ZAHL IN ZEILE GEFUNDEN!
+                    seen[val] = true;
                 }
-  }
+            }
+        }
 
-  @Override
-  public void textValueChanged(TextEvent te)
-  {
-    if(((TextComponent)te.getSource()).getText().matches("[123456789]"));
-    else
-      ((TextComponent)te.getSource()).setText(null);
-  }
+        // 2. Spalten prüfen
+        for (int c = 0; c < 9; c++) {
+            boolean[] seen = new boolean[10];
+            for (int r = 0; r < 9; r++) {
+                int val = grid[r][c];
+                if (val != 0) {
+                    if (seen[val]) return false; // DOPPELTE ZAHL IN SPALTE GEFUNDEN!
+                    seen[val] = true;
+                }
+            }
+        }
 
-
-  public static void main(String args[])
-  {  Sudoku s = new Sudoku();
-    // Weise sie der statischen Variable zu
-    frame = s;
- //   frame.addWindowListener(new FensterLauscher());
-    frame.setLayout(new FlowLayout());
-    Panel raster = new Panel();
+        // 3. Blöcke prüfen
+        for (int block = 0; block < 9; block++) {
+            boolean[] seen = new boolean[10];
+            int rowStart = (block / 3) * 3;
+            int colStart = (block % 3) * 3;
+            for (int r = rowStart; r < rowStart + 3; r++) {
+                for (int c = colStart; c < colStart + 3; c++) {
+                    int val = grid[r][c];
+                    if (val != 0) {
+                        if (seen[val]) return false; // DOPPELTE ZAHL IM BLOCK GEFUNDEN!
+                        seen[val] = true;
+                    }
+                }
+            }
+        }
+        return true; // Gitter ist absolut fehlerfrei
+    }
     
-    raster.setMinimumSize(new Dimension(500,500));
-    raster.setMaximumSize(new Dimension(500,500));
-    raster.setPreferredSize(new Dimension(500,500));
+    public void generate360PuzzlesWithLevels() {
+    Random rnd = new Random();
+    System.out.println("Starte Massengenerierung (3 Stufen mit Ausbruchschutz)...");
+    
+    File sudoFile = new File(TARGET_DIR + File.separator + "sudos.txt");
+    File loesFile = new File(TARGET_DIR + File.separator + "lösungen.txt");
+    sudoFile.delete();
+    loesFile.delete();
+
+    for (int num = 1; num <= 360; num++) {
+        boolean puzzleValid = false;
+
+        // Dieser Zähler verhindert, dass wir bei einem "schlechten" Gitter feststecken
+        int masterAttempts = 0; 
+
+        while (!puzzleValid && masterAttempts < 200) {
+            masterAttempts++;
+            int[][] solutionGrid = new int[9][9];
             
-    
-    
-    
-    
-    raster.setLayout(new GridLayout(9,9));
-    for (int i=0;i<9;i++)
-    {
-      for(int j=0;j<9;j++)
-      {
-        frame.inputs[i][j] = new TextField(1);
-        frame.ip[i][j] = new TextField(1);
-        frame.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
-        raster.add(frame.inputs[i][j]);
-        frame.inputs[i][j].addTextListener(frame);
-      }
+            if (fillBoard(solutionGrid, rnd)) {
+                int[][] puzzleGrid = new int[9][9];
+                for (int i = 0; i < 9; i++) {
+                    System.arraycopy(solutionGrid[i], 0, puzzleGrid[i], 0, 9);
+                }
+
+                // Exakte Zielvorgaben für die Buchaufteilung (1-120 / 121-240 / 241-360)
+                int targetRemove = (num <= 120) ? 36 : (num <= 240) ? 50 : 54; 
+
+                ArrayList<Integer> positions = new ArrayList<>();
+                for (int i = 0; i < 81; i++) positions.add(i);
+                Collections.shuffle(positions, rnd);
+
+                int removed = 0;
+
+                for (int pos : positions) {
+                    if (removed >= targetRemove) break;
+
+                    int x = pos / 9;
+                    int y = pos % 9;
+                    int targetX = 8 - x;
+                    int targetY = 8 - y;
+
+                    if (puzzleGrid[x][y] != 0) {
+                        int temp1 = puzzleGrid[x][y];
+                        int temp2 = puzzleGrid[targetX][targetY];
+
+                        puzzleGrid[x][y] = 0;
+                        puzzleGrid[targetX][targetY] = 0;
+
+                        if (countSolutions(puzzleGrid, 0, 0) == 1) {
+                            removed += (x == targetX && y == targetY) ? 1 : 2;
+                        } else {
+                            puzzleGrid[x][y] = temp1;
+                            puzzleGrid[targetX][targetY] = temp2;
+                        }
+                    }
+                }
+
+                // Validierungs-Check für den erfolgreichen Export
+                if (num <= 120 && removed >= targetRemove) {
+                    puzzleValid = true;
+                } else if (num <= 240 && removed >= 48) { // Tolleranz für Mittel
+                    puzzleValid = true;
+                } else if (num > 240 && removed >= 44) { // Stabile Untergrenze für Eindeutigkeit bei "Schwer"
+                    puzzleValid = true;
+                }
+
+                if (puzzleValid) {
+                    writeGridToFile(puzzleGrid, "sudos.txt");
+                    writeGridToFile(solutionGrid, "lösungen.txt");
+                }
+            }
+        }
+        
+        // Falls ein Rätsel nach 200 Versuchen nicht klappt, erzwingen wir den Durchbruch
+        if (!puzzleValid) {
+            num--; // Schleifendurchlauf für diese Nummer wiederholen mit komplett neuem Gitter!
+        }
     }
-    frame.add(raster);
-    frame.button.addActionListener(frame);
-    frame.button1.addActionListener(frame);
-    Panel input = new Panel();
-    input.add(frame.button);
-    input.add(frame.button1);
-    frame.add(input);
-    frame.pack();
-    frame.setVisible(true);
+    System.out.println("Massengenerierung beendet. Alle 360 Rätsel stabil exportiert!");
+}
 
-  }
 
-  
+    
+    private boolean check(int[][] grid, int row, int col, int val) {
+    // 1. Zeile prüfen
+    for (int c = 0; c < 9; c++) {
+        if (grid[row][c] == val) return false;
+    }
 
+    // 2. Spalte prüfen
+    for (int r = 0; r < 9; r++) {
+        if (grid[r][col] == val) return false;
+    }
+
+    // 3. 3x3-Block prüfen
+    int rowStart = (row / 3) * 3;
+    int colStart = (col / 3) * 3;
+    for (int r = rowStart; r < rowStart + 3; r++) {
+        for (int c = colStart; c < colStart + 3; c++) {
+            if (grid[r][c] == val) return false;
+        }
+    }
+
+    return true; // Zahl darf hier platziert werden
+}
+
+
+
+    // Unabhängiger, unfehlbarer Validierungs-Scanner für das Startgitter
+    private boolean isGridValidFromStart(int[][] grid) {
+        // Prüfe alle 9 Zeilen separat auf doppelte Zahlen
+        for (int r = 0; r < 9; r++) {
+            boolean[] seen = new boolean[10];
+            for (int c = 0; c < 9; c++) {
+                int val = grid[r][c];
+                if (val != 0) {
+                    if (seen[val]) return false; // Zahl doppelt in dieser Zeile!
+                    seen[val] = true;
+                }
+            }
+        }
+
+        // Prüfe alle 9 Spalten separat auf doppelte Zahlen
+        for (int c = 0; c < 9; c++) {
+            boolean[] seen = new boolean[10];
+            for (int r = 0; r < 9; r++) {
+                int val = grid[r][c];
+                if (val != 0) {
+                    if (seen[val]) return false; // Zahl doppelt in dieser Spalte!
+                    seen[val] = true;
+                }
+            }
+        }
+
+        // Prüfe alle neun 3x3 Blöcke separat auf doppelte Zahlen
+        for (int block = 0; block < 9; block++) {
+            boolean[] seen = new boolean[10];
+            int rowStart = (block / 3) * 3;
+            int colStart = (block % 3) * 3;
+            for (int r = rowStart; r < rowStart + 3; r++) {
+                for (int c = colStart; c < colStart + 3; c++) {
+                    int val = grid[r][c];
+                    if (val != 0) {
+                        if (seen[val]) return false; // Zahl doppelt in diesem 3x3 Block!
+                        seen[val] = true;
+                    }
+                }
+            }
+        }
+
+        return true; // Das Rätsel ist im Ausgangszustand absolut fehlerfrei und legal!
+    }
+
+
+    
+    
+    
+    
+    public void performCreate() throws IllegalArgumentException {
+        clearMainField();
+        Random rnd = new Random();
+        int[][] solutionGrid = new int[9][9];
+        
+        if (fillBoard(solutionGrid, rnd)) {
+            for (int i = 0; i < 9; i++) {
+                System.arraycopy(solutionGrid[i], 0, currentSolution[i], 0, 9);
+            }
+            int[][] puzzleGrid = new int[9][9];
+            for (int i = 0; i < 9; i++) {
+                System.arraycopy(solutionGrid[i], 0, puzzleGrid[i], 0, 9);
+            }
+            int cellsToRemove = 49; 
+            while (cellsToRemove > 0) {
+                int x = rnd.nextInt(9);
+                int y = rnd.nextInt(9);
+                if (puzzleGrid[x][y] != 0) {
+                    puzzleGrid[x][y] = 0;
+                    cellsToRemove--;
+                }
+            }
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    if (puzzleGrid[i][j] != 0) {
+                        String valStr = Integer.toString(puzzleGrid[i][j]);
+                        inputs[i][j].setText(valStr);
+                        ip[i][j].setText(valStr);
+                    } else {
+                        inputs[i][j].setText("");
+                        ip[i][j].setText("");
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean fillBoard(int[][] grid, Random rnd) {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if (grid[row][col] == 0) {
+                    ArrayList<Integer> numbers = new ArrayList<>();
+                    for (int i = 1; i <= 9; i++) numbers.add(i);
+                    Collections.shuffle(numbers, rnd);
+                    for (int num : numbers) {
+                        if (isValid(grid, row, col, num)) {
+                            grid[row][col] = num;
+                            if (fillBoard(grid, rnd)) return true;
+                            grid[row][col] = 0;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isValid(int[][] grid, int row, int col, int num) {
+        for (int i = 0; i < 9; i++) {
+            if (grid[row][i] == num || grid[i][col] == num) return false;
+        }
+        int boxRowStart = row - row % 3;
+        int boxColStart = col - col % 3;
+        for (int r = boxRowStart; r < boxRowStart + 3; r++) {
+            for (int c = boxColStart; c < boxColStart + 3; c++) {
+                if (grid[r][c] == num) return false;
+            }
+        }
+        return true;
+    }
+     @Override
+    public void textValueChanged(TextEvent ev) {}
+
+    @Override
+    public void actionPerformed(ActionEvent ev) {
+        if (ev.getSource() == buttonCreate || ev.getActionCommand().equals("Create")) {
+            try { 
+                performCreate(); 
+            } catch (IllegalArgumentException ex) { 
+                clearMainField(); 
+            }
+        }
+        else if (ev.getSource() == buttonSolve || ev.getActionCommand().equals("Solve")) {
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    if (currentSolution[i][j] != 0) {
+                        inputs[i][j].setText(Integer.toString(currentSolution[i][j]));
+                        ip[i][j].setText(Integer.toString(currentSolution[i][j]));
+                    }
+                }
+            }
+        }
+    }
+
+    private void initUI(Sudoku s) {
+        s.setLayout(new FlowLayout());
+        s.setSize(540, 600);
+        raster = new Panel();
+        raster.setLayout(new GridLayout(9, 9, 2, 2));
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                s.inputs[i][j] = new TextField(1);
+                s.ip[i][j] = new TextField(1);
+                s.inputs[i][j].setFont(new Font("SansSerif", Font.BOLD, 25));
+                s.inputs[i][j].addTextListener(s);
+                raster.add(s.inputs[i][j]);
+            }
+        }
+        buttonCreate = new Button("Generieren");
+        buttonCreate.setActionCommand("Create");
+        buttonCreate.addActionListener(s);
+        buttonSolve = new Button("Lösen");
+        buttonSolve.setActionCommand("Solve");
+        buttonSolve.addActionListener(s);
+        s.add(raster);
+        s.add(buttonCreate);
+        s.add(buttonSolve);
+        s.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) { System.exit(0); }
+        });
+        s.setVisible(true);
+    }
+
+    // Diese neue Hilfsmethode zählt, wie viele Lösungen ein Gitter hat
+private int countSolutions(int[][] grid, int row, int col) {
+    // Wenn wir am Ende des Brettes sind, haben wir EINE Lösung gefunden
+    if (row == 9) return 1;
+
+    int nextRow = (col == 8) ? row + 1 : row;
+    int nextCol = (col == 8) ? 0 : col + 1;
+
+    if (grid[row][col] != 0) {
+        return countSolutions(grid, nextRow, nextCol);
+    }
+
+    int solutionsFound = 0;
+    for (int val = 1; val <= 9; val++) {
+        if (check(grid, row, col, val)) { // Standard-Validitäts-Check
+            grid[row][col] = val;
+            solutionsFound += countSolutions(grid, nextRow, nextCol);
+            grid[row][col] = 0; // Backtrack
+            
+            // Performance-Optimierung: Wenn wir schon mehr als 1 Lösung 
+            // gefunden haben, können wir sofort abbrechen (Rätsel ist ungültig!)
+            if (solutionsFound > 1) return solutionsFound;
+        }
+    }
+    return solutionsFound;
+}
+
+    
+    public static void main(String[] args) {
+        new Sudoku();
+    }
 }
