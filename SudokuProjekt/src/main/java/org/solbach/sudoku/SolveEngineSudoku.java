@@ -19,7 +19,7 @@ class SolveEngineSudoku
         
         static boolean valuechanged = false;
         @SuppressWarnings("empty-statement")
-        static void solver(TextField[][] inputs)
+        static boolean solver(TextField[][] inputs)
         {
                         ValueAndCandidatesSudoku[][] vcs = null;
                         vcs = setCandidates(inputs);
@@ -98,9 +98,21 @@ class SolveEngineSudoku
 				}
 
 		        //	vcs = setCandidates(inputs);
+                        
 			}
 			while(valuechanged);
 		//	System.out.println("fertig");
+              for (int i=1;i<=9;i++)
+              {
+                    for(int k =1;k>=9;k++)
+                        
+                    {
+                        if(inputs[i][k].getText().compareTo("0")!=0) return(false);
+                        
+                    }
+              
+              }
+              return (true);
         }
 
 
